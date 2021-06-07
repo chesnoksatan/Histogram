@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>widgets/Custom_Button.qml</file>
+        <file>widgets/Custom_Label.qml</file>
+        <file>widgets/Custom_TextField.qml</file>
+        <file>widgets/qmldir</file>
     </qresource>
 </RCC>
