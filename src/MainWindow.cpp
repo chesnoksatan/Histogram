@@ -29,17 +29,13 @@ MainWindow::~MainWindow()
         delete m_mainWindow;
 }
 
-void MainWindow::getDict( const std::vector< std::pair< quint64, QString > > &dict )
+void MainWindow::getDict( const std::vector< std::pair< QString, quint64 > > &dict )
 {
-    //    qDebug() << dict;
-
     QJsonObject tmp;
 
-    for ( const auto &elem : dict )
-    {
-        tmp.insert( elem.second, QJsonValue::fromVariant( elem.first ) );
-    }
+    std::for_each( dict.cbegin(), dict.cend(), [&tmp]( const auto &elem ) {
+        tmp.insert( elem.first, QJsonValue::fromVariant( elem.second ) );
+    } );
+
     emit getValue( tmp );
-    //    emit getVector(
-    //        QVector< std::pair< quint64, QString > >::fromStdVector( dict ) );
 }

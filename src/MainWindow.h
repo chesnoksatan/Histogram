@@ -17,7 +17,7 @@ public:
     ~MainWindow() override;
 
 public slots:
-    void getDict( const std::vector< std::pair< quint64, QString > > &dict );
+    void getDict( const std::vector< std::pair< QString, quint64 > > &dict );
 
 signals:
     ///

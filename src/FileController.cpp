@@ -10,21 +10,12 @@
 namespace {
 struct
 {
-    bool operator()( std::pair< quint64, QString > a,
-                     std::pair< quint64, QString > b ) const
+    bool operator()( std::pair< QString, quint64 > a,
+                     std::pair< QString, quint64 > b ) const
     {
-        return a.first > b.first;
+        return a.second > b.second;
     }
 } maxCountSort;
-
-struct
-{
-    bool operator()( std::pair< quint64, QString > a,
-                     std::pair< quint64, QString > b ) const
-    {
-        return a.second < b.second;
-    }
-} alphabetSort;
 } // namespace
 
 FileController::FileController( QObject *parent ) : QObject( parent )
@@ -53,6 +44,8 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
     QFile currentFile( filePath.toLocalFile() );
 
     Dictionary container;
+
+    int j = 0;
 
     if ( currentFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
     {
@@ -89,7 +82,7 @@ FileController::getTop( const FileController::Dictionary &dictionary )
 {
     DictionaryVector container;
     for ( auto &pair : dictionary )
-        container.push_back( { pair.second, pair.first } );
+        container.push_back( pair );
 
     /// Отсортируем элементы вектора по убыванию количества вхождений
     std::sort( container.begin(), container.end(), maxCountSort );
@@ -97,15 +90,17 @@ FileController::getTop( const FileController::Dictionary &dictionary )
     if ( container.size() > 15 )
         container.erase( container.begin() + 15, container.end() );
     /// Отсортируем в алфавитном порядке
-    std::sort( container.begin(), container.end(), alphabetSort );
+    std::sort( container.begin(), container.end() );
 
     return container;
 }
 
 QString FileController::filterString( const QString &str )
 {
-    /// Приводим всю строку к нижнему регистру и убираем все символы перевода строки
-    return str.toLower().remove( "\n" );
+    return str.toLower()
+        .remove( "\n" )
+        .remove( QRegExp( "\\d" ) )
+        .remove( QRegExp( " [^a-zа-я\\d\\s] " ) );
 }
 
 void FileController::calculate()

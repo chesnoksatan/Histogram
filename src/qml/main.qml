@@ -70,11 +70,12 @@ Window {
             anchors.fill: parent
             Repeater {
                 id: topWordsRepeater
+                visible: false
                 model: 15
                 Custom_Label {
                     property string word: ""
                     property int count: 0
-                    text: (index + 1) + '. ' + word + "  " + count
+                    text: word + "  " + count
                 }
             }
         }
@@ -126,6 +127,7 @@ Window {
 
     function setupRepeater(dict)
     {
+        topWordsRepeater.visible = true
         var j = 0
         for ( var i in dict )
         {

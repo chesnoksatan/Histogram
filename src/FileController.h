@@ -14,7 +14,7 @@ class FileController : public QObject
         std::map< QString, quint64 >; ///< Ключем является слово, значением -
                                       ///< количество его вхождений в тексте
 
-    using DictionaryVector = std::vector< std::pair< quint64, QString > >;
+    using DictionaryVector = std::vector< std::pair< QString, quint64 > >;
 
 public:
     explicit FileController( QObject *parent = nullptr );
