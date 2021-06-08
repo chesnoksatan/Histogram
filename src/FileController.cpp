@@ -7,6 +7,26 @@
 #include <QThread>
 #include <QUrl>
 
+namespace {
+struct
+{
+    bool operator()( std::pair< quint64, QString > a,
+                     std::pair< quint64, QString > b ) const
+    {
+        return a.first > b.first;
+    }
+} maxCountSort;
+
+struct
+{
+    bool operator()( std::pair< quint64, QString > a,
+                     std::pair< quint64, QString > b ) const
+    {
+        return a.second < b.second;
+    }
+} alphabetSort;
+} // namespace
+
 FileController::FileController( QObject *parent ) : QObject( parent )
 {
 }
@@ -15,9 +35,15 @@ FileController::~FileController()
 {
 }
 
+void FileController::abort()
+{
+    QMutexLocker locker( &m_mutex );
+    m_abort = true;
+}
+
 void FileController::slotGetFilePath( const QUrl &filePath )
 {
-    QMutexLocker locker( &m_mutexRequests );
+    QMutexLocker locker( &m_mutex );
     m_fileRequests.enqueue( filePath );
 }
 
@@ -37,10 +63,12 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
             emit getProgress(
                 ( ( size - currentFile.bytesAvailable() ) * 100 ) / size );
 
-            const auto &list = line.toLower().remove( "\n" ).split( " " );
-            std::for_each(
-                list.begin(), list.end(),
-                [&container]( const auto &word ) { container[word]++; } );
+            const auto &list = filterString( line ).split( " " );
+            std::for_each( list.begin(), list.end(),
+                           [&container]( const auto &word ) {
+                               if ( word != "" )
+                                   container[word]++;
+                           } );
         }
 
         currentFile.close();
@@ -54,9 +82,27 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
     return container;
 }
 
-void FileController::getTop( const FileController::Dictionary &dictionary )
+FileController::DictionaryVector
+FileController::getTop( const FileController::Dictionary &dictionary )
 {
-    Q_UNUSED( dictionary )
+    DictionaryVector container;
+    for ( auto &pair : dictionary )
+        container.push_back( { pair.second, pair.first } );
+
+    /// Отсортируем элементы вектора по убыванию количества вхождений
+    std::sort( container.begin(), container.end(), maxCountSort );
+    /// Оставим в массиве топ 15 слов
+    container.erase( container.begin() + 15, container.end() );
+    /// Отсортируем в алфавитном порядке
+    std::sort( container.begin(), container.end(), alphabetSort );
+
+    return container;
+}
+
+QString FileController::filterString( const QString &str )
+{
+    /// Приводим всю строку к нижнему регистру и убираем все символы перевода строки
+    return str.toLower().remove( "\n" );
 }
 
 void FileController::calculate()
@@ -69,13 +115,13 @@ void FileController::calculate()
         if ( m_abort )
             break;
 
-        m_mutexRequests.lock();
+        m_mutex.lock();
         if ( !m_fileRequests.isEmpty() )
         {
             const auto &dict = readFile( m_fileRequests.dequeue() );
             getTop( dict );
         }
-        m_mutexRequests.unlock();
+        m_mutex.unlock();
 
         QThread::sleep( 1 );
     }

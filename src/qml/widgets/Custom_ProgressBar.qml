@@ -27,6 +27,7 @@ ProgressBar {
             height: parent.height
             radius: 2
             color: "#00bfff"
+            Behavior on width { NumberAnimation { duration: 150 } }
         }
     }
 }

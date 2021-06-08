@@ -16,7 +16,7 @@ file(GLOB_RECURSE SOURCE_FILES "*.cpp")
 file(GLOB_RECURSE RESOURCES_FILES "*.qrc")
 
 # Configure Qt
-find_package( Qt5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 )
+find_package( Qt5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Charts )
 
 add_executable(${TARGET_NAME} ${SOURCES})
 
@@ -27,4 +27,5 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     Qt5::Quick
     Qt5::Qml
     Qt5::QuickControls2
+    Qt5::Charts
 )

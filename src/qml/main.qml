@@ -5,6 +5,8 @@ import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0
 
+import QtCharts 2.3
+
 import "widgets"
 
 Window {
@@ -28,7 +30,22 @@ Window {
         property alias height: window.height
     }
 
+    ChartView {
+        id: chart
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            top: mainRow.bottom
+        }
+
+        legend.alignment: Qt.AlignBottom
+        antialiasing: true
+
+    }
+
     RowLayout {
+        id: mainRow
         anchors {
             top: parent.top
             left: parent.left

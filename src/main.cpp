@@ -1,10 +1,10 @@
 #include "Core.h"
 
-#include <QGuiApplication>
+#include <QApplication>
 
 int main( int argc, char *argv[] )
 {
-    QGuiApplication app( argc, argv );
+    QApplication app( argc, argv );
 
     Core core;
 

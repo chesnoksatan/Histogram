@@ -14,6 +14,8 @@ class FileController : public QObject
         std::map< QString, quint64 >; ///< Ключем является слово, значением -
                                       ///< количество его вхождений в тексте
 
+    using DictionaryVector = std::vector< std::pair< quint64, QString > >;
+
 public:
     explicit FileController( QObject *parent = nullptr );
     ~FileController();
@@ -22,7 +24,7 @@ public:
     /*!
      *   \brief Прекращение работы потока
      */
-    void abort() { m_abort = true; }
+    void abort();
 
 signals:
     ///
@@ -50,7 +52,7 @@ public slots:
     void slotGetFilePath( const QUrl &filePath );
 
 private:
-    QMutex m_mutexRequests; ///< Мьютекс для очереди запросов
+    QMutex m_mutex;
     std::atomic< bool > m_abort; ///< Флаг прекращения потока
     QQueue< QUrl > m_fileRequests; ///< Очередь запросов
 
@@ -62,5 +64,7 @@ private:
     ///
     Dictionary readFile( const QUrl &filePath );
 
-    void getTop( const Dictionary &dictionary );
+    DictionaryVector getTop( const Dictionary &dictionary );
+
+    QString filterString( const QString &str );
 };
