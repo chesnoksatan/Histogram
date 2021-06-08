@@ -28,18 +28,21 @@ void Core::setConnections() const noexcept
 {
     QObject::connect( m_mainWindow, &MainWindow::setFile, m_fileController,
                       &FileController::slotGetFilePath );
+
+    QObject::connect( m_fileController, &FileController::getProgress,
+                      m_mainWindow, &MainWindow::getProgress );
 }
 
 void Core::startThread() const noexcept
 {
     m_fileController->moveToThread( m_fileThread );
 
-    //! В момент запуска второстепенного потока вызвается функция calculate
+    /// В момент запуска второстепенного потока вызвается функция calculate
     QObject::connect( m_fileThread, &QThread::started, m_fileController,
                       &FileController::calculate );
 
-    //! При завершении работы функции calculate потоку передается сигнал
-    //! finished, который вызывает срабатывание слота quit
+    /// При завершении работы функции calculate потоку передается сигнал
+    /// finished, который вызывает срабатывание слота quit
     QObject::connect( m_fileController, &FileController::finished, m_fileThread,
                       &QThread::quit );
 

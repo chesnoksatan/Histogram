@@ -3,3 +3,4 @@ module widgets
 Custom_button 1.0 Custom_button.qml
 Custom_Label 1.0 Custom_Label.qml
 Custom_TextField 1.0 Custom_TextField.qml
+Custom_ProgressBar 1.0 Custom_ProgressBar.qml

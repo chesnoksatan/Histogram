@@ -14,6 +14,11 @@ Window {
     visible: true
     title: "Histogram"
 
+    Connections {
+        target: Histogram
+        onGetProgress: progressBar.value = progress
+    }
+
     // Для сохранения позиции и размеров окна
     Settings {
         id: settings
@@ -33,6 +38,11 @@ Window {
 
         Custom_TextField {
             id: file_name
+            Layout.fillWidth: true
+        }
+
+        Custom_ProgressBar {
+            id: progressBar
             Layout.fillWidth: true
         }
 
