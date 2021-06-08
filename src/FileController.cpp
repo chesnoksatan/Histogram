@@ -29,6 +29,7 @@ struct
 
 FileController::FileController( QObject *parent ) : QObject( parent )
 {
+    qRegisterMetaType< DictionaryVector >( "DictionaryVector" );
 }
 
 FileController::~FileController()
@@ -69,6 +70,7 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
                                if ( word != "" )
                                    container[word]++;
                            } );
+            //            emit getDict( getTop( container ) );
         }
 
         currentFile.close();
@@ -92,7 +94,8 @@ FileController::getTop( const FileController::Dictionary &dictionary )
     /// Отсортируем элементы вектора по убыванию количества вхождений
     std::sort( container.begin(), container.end(), maxCountSort );
     /// Оставим в массиве топ 15 слов
-    container.erase( container.begin() + 15, container.end() );
+    if ( container.size() > 15 )
+        container.erase( container.begin() + 15, container.end() );
     /// Отсортируем в алфавитном порядке
     std::sort( container.begin(), container.end(), alphabetSort );
 
@@ -119,7 +122,7 @@ void FileController::calculate()
         if ( !m_fileRequests.isEmpty() )
         {
             const auto &dict = readFile( m_fileRequests.dequeue() );
-            getTop( dict );
+            emit getDict( getTop( dict ) );
         }
         m_mutex.unlock();
 

@@ -3,6 +3,7 @@ import QtQuick 2.10
 import QtQuick.Window 2.10
 import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.3
+import QtQuick.Controls 2.3
 import Qt.labs.settings 1.0
 
 import QtCharts 2.3
@@ -19,6 +20,10 @@ Window {
     Connections {
         target: Histogram
         onGetProgress: progressBar.value = progress
+        onGetValue: {
+            setBar(value)
+            setupRepeater(value)
+        }
     }
 
     // Для сохранения позиции и размеров окна
@@ -34,7 +39,7 @@ Window {
         id: chart
         anchors {
             left: parent.left
-            right: parent.right
+            right: topWords.left
             bottom: parent.bottom
             top: mainRow.bottom
         }
@@ -42,6 +47,44 @@ Window {
         legend.alignment: Qt.AlignBottom
         antialiasing: true
 
+        BarSeries {
+            id: dictSeries
+
+            axisX: BarCategoryAxis {
+                id: categoryAxis
+                labelsVisible: false
+            }
+            axisY: ValueAxis {
+                id: yAxis
+                min: 0
+            }
+        }
+    }
+
+    GroupBox {
+        id: topWords
+        title: "Top 15 words"
+        width: 150
+
+        Column {
+            anchors.fill: parent
+            Repeater {
+                id: topWordsRepeater
+                model: 15
+                Custom_Label {
+                    property string word: ""
+                    property int count: 0
+                    text: (index + 1) + '. ' + word + "  " + count
+                }
+            }
+        }
+
+        anchors {
+            top: mainRow.bottom
+            right: parent.right
+            bottom: parent.bottom
+            margins: 5
+        }
     }
 
     RowLayout {
@@ -79,5 +122,30 @@ Window {
             file_name.text = fileDialog.fileUrl.toString()
             Histogram.setFile(fileDialog.fileUrl.toString())
         }
+    }
+
+    function setupRepeater(dict)
+    {
+        var j = 0
+        for ( var i in dict )
+        {
+            topWordsRepeater.itemAt(j).word = i
+            topWordsRepeater.itemAt(j).count = dict[i]
+            j++
+        }
+    }
+
+    function setBar(dict)
+    {
+        dictSeries.clear()
+        var max = 0
+        for ( var i in dict )
+        {
+            max = Math.max(dict[i], max)
+            dictSeries.append(i, [dict[i]])
+            categoryAxis.categories += i
+        }
+
+        yAxis.max = max
     }
 }

@@ -21,14 +21,14 @@ public:
     ~FileController();
 
 public:
-    /*!
-     *   \brief Прекращение работы потока
-     */
+    ///
+    /// \brief Прекращение работы потока
+    ///
     void abort();
 
 signals:
     ///
-    ///   \brief Сигнал прекращение завершения потока
+    /// \brief Сигнал прекращение завершения потока
     ///
     void finished();
 
@@ -37,6 +37,8 @@ signals:
     /// \param progress
     ///
     void getProgress( const qint64 progress );
+
+    void getDict( const DictionaryVector &dict );
 
 public slots:
     ///

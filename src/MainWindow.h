@@ -16,6 +16,9 @@ public:
     explicit MainWindow( QObject *parent = nullptr );
     ~MainWindow() override;
 
+public slots:
+    void getDict( const std::vector< std::pair< quint64, QString > > &dict );
+
 signals:
     ///
     /// \brief setFile сигнал обозначающий, что пользователь выбрал файл
@@ -27,6 +30,8 @@ signals:
     /// \param progress
     ///
     void getProgress( const qint64 progress );
+
+    void getValue( const QJsonObject &value );
 
 private:
     QQmlApplicationEngine *m_engine;

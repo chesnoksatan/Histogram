@@ -31,6 +31,9 @@ void Core::setConnections() const noexcept
 
     QObject::connect( m_fileController, &FileController::getProgress,
                       m_mainWindow, &MainWindow::getProgress );
+
+    QObject::connect( m_fileController, &FileController::getDict, m_mainWindow,
+                      &MainWindow::getDict );
 }
 
 void Core::startThread() const noexcept
