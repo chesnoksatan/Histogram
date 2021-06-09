@@ -36,6 +36,7 @@ void TopController::slotGetDictionary( const TopController::Dictionary &dictiona
 void TopController::getTop( const TopController::Dictionary &dictionary )
 {
     DictionaryVector container;
+
     for ( auto &pair : dictionary )
         container.push_back( pair );
 
@@ -61,8 +62,10 @@ void TopController::calculate()
             break;
 
         m_mutex.lock();
+
         if ( !m_dictionaryRequests.isEmpty() )
             getTop( m_dictionaryRequests.dequeue() );
+
         m_mutex.unlock();
 
         QThread::usleep( 700 );

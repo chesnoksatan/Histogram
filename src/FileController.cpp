@@ -1,7 +1,6 @@
 #include "FileController.h"
 
 #include <QCoreApplication>
-#include <QDateTime>
 #include <QDebug>
 #include <QFile>
 #include <QThread>
@@ -60,8 +59,8 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
                            } );
 
             /// Для обновления гистограммы в условно реальном времени
-            /// Если посылать при каждой итерации цикла программа сходит с ума и
-            /// все перестает работать (для больших файлов)
+            /// Если посылать при каждой итерации цикла программа сходит с
+            /// ума и все перестает работать (для больших файлов)
             if ( ( progress % 5 == 0 ) && progress )
             {
                 if ( !isSend )
@@ -88,7 +87,7 @@ QString FileController::filterString( const QString &str )
     return str.toLower()
         .remove( "\n" )
         .remove( QRegExp( "\\d" ) )
-        .remove( QRegExp( " [^a-zа-я\\d\\s] " ) );
+        .remove( QRegExp( "[^a-zа-я\\d\\s]" ) );
 }
 
 void FileController::calculate()

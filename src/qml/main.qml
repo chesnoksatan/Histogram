@@ -24,10 +24,7 @@ Window {
             setBar(value)
             setupRepeater(value)
         }
-        onGetEmptyFile: {
-            console.debug("SSSSSSSS")
-            emptyFileLabel.visible = true
-        }
+        onGetEmptyFile: emptyFileLabel.visible = true
     }
 
     // Для сохранения позиции и размеров окна
@@ -134,7 +131,6 @@ Window {
         onAccepted: {
             file_name.text = fileDialog.fileUrl.toString()
             emptyFileLabel.visible = false
-            dictSeries.clear()
             Histogram.setFile(fileDialog.fileUrl.toString())
         }
     }
