@@ -29,6 +29,9 @@ void Core::setConnections() const noexcept
     QObject::connect( m_mainWindow, &MainWindow::setFile, m_fileController,
                       &FileController::slotGetFilePath );
 
+    QObject::connect( m_fileController, &FileController::getEmptyFile,
+                      m_mainWindow, &MainWindow::getEmptyFile );
+
     QObject::connect( m_fileController, &FileController::getProgress,
                       m_mainWindow, &MainWindow::getProgress );
 

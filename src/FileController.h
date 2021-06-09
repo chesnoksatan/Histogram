@@ -14,7 +14,7 @@ class FileController : public QObject
         std::map< QString, quint64 >; ///< Ключем является слово, значением -
                                       ///< количество его вхождений в тексте
 
-    using DictionaryVector = std::vector< std::pair< QString, quint64 > >;
+    using DictionaryVector = std::vector< std::pair< QString, quint64 > >; ///< Структура для сортировки и хранения top15
 
 public:
     explicit FileController( QObject *parent = nullptr );
@@ -38,7 +38,13 @@ signals:
     ///
     void getProgress( const qint64 progress );
 
+    ///
+    /// \brief getDict сигнал о том, что мы получили из файла top15
+    /// \param dict top15
+    ///
     void getDict( const DictionaryVector &dict );
+
+    void getEmptyFile();
 
 public slots:
     ///
@@ -66,7 +72,15 @@ private:
     ///
     Dictionary readFile( const QUrl &filePath );
 
+    ///
+    /// \brief getTop Трансформируем мапу в top15
+    /// \param dictionary мапа со словами их количеством вхождений
+    ///
     DictionaryVector getTop( const Dictionary &dictionary );
 
+    ///
+    /// \brief filterString Отфильтруем строку файла в необходимый формат
+    /// \param str
+    ///
     QString filterString( const QString &str );
 };

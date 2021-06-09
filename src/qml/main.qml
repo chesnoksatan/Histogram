@@ -24,6 +24,10 @@ Window {
             setBar(value)
             setupRepeater(value)
         }
+        onGetEmptyFile: {
+            console.debug("SSSSSSSS")
+            emptyFileLabel.visible = true
+        }
     }
 
     // Для сохранения позиции и размеров окна
@@ -42,6 +46,7 @@ Window {
             right: topWords.left
             bottom: parent.bottom
             top: mainRow.bottom
+            margins: 5
         }
 
         legend.alignment: Qt.AlignBottom
@@ -59,6 +64,13 @@ Window {
                 min: 0
             }
         }
+    }
+
+    Custom_Label {
+        id: emptyFileLabel
+        anchors.centerIn: parent;
+        text: "Выбранный файл оказался пустым. Выберите новый файл"
+        visible: false
     }
 
     GroupBox {
@@ -121,6 +133,8 @@ Window {
         nameFilters: [ "Text files (*.txt)" ]
         onAccepted: {
             file_name.text = fileDialog.fileUrl.toString()
+            emptyFileLabel.visible = false
+            dictSeries.clear()
             Histogram.setFile(fileDialog.fileUrl.toString())
         }
     }
@@ -145,6 +159,7 @@ Window {
         {
             max = Math.max(dict[i], max)
             dictSeries.append(i, [dict[i]])
+            /// Иначе середина столбцов уплывает в неизвестном направлении
             categoryAxis.categories += i
         }
 

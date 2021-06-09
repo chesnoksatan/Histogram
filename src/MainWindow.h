@@ -17,6 +17,10 @@ public:
     ~MainWindow() override;
 
 public slots:
+    ///
+    /// \brief getDict слот для обработки входящего топ15
+    /// \param dict
+    ///
     void getDict( const std::vector< std::pair< QString, quint64 > > &dict );
 
 signals:
@@ -31,7 +35,13 @@ signals:
     ///
     void getProgress( const qint64 progress );
 
+    ///
+    /// \brief getValue отправляем на гуй топ15
+    /// \param value
+    ///
     void getValue( const QJsonObject &value );
+
+    void getEmptyFile();
 
 private:
     QQmlApplicationEngine *m_engine;

@@ -16,6 +16,8 @@ struct
         return a.second > b.second;
     }
 } maxCountSort;
+
+constexpr auto TOP = 15;
 } // namespace
 
 FileController::FileController( QObject *parent ) : QObject( parent )
@@ -45,25 +47,39 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
 
     Dictionary container;
 
-    int j = 0;
-
     if ( currentFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
     {
         const auto size = currentFile.size();
 
+        if ( size == 0 )
+        {
+            qDebug() << "На обработку пришел пустой файл";
+            emit getEmptyFile();
+        }
+
+        bool isSend = false;
         while ( !currentFile.atEnd() )
         {
             const auto &line = trUtf8( currentFile.readLine() );
-            emit getProgress(
-                ( ( size - currentFile.bytesAvailable() ) * 100 ) / size );
+            const auto progress =
+                ( ( size - currentFile.bytesAvailable() ) * 100 ) / size;
+            emit getProgress( progress );
 
             const auto &list = filterString( line ).split( " " );
             std::for_each( list.begin(), list.end(),
                            [&container]( const auto &word ) {
-                               if ( word != "" )
+                               if ( word.length() > 1 )
                                    container[word]++;
                            } );
-            //            emit getDict( getTop( container ) );
+
+            if ( ( progress % 5 == 0 ) && progress )
+            {
+                if ( !isSend )
+                    emit getDict( getTop( container ) );
+                isSend = true;
+            }
+            else
+                isSend = false;
         }
 
         currentFile.close();
@@ -87,8 +103,8 @@ FileController::getTop( const FileController::Dictionary &dictionary )
     /// Отсортируем элементы вектора по убыванию количества вхождений
     std::sort( container.begin(), container.end(), maxCountSort );
     /// Оставим в массиве топ 15 слов
-    if ( container.size() > 15 )
-        container.erase( container.begin() + 15, container.end() );
+    if ( container.size() > TOP )
+        container.erase( container.begin() + TOP, container.end() );
     /// Отсортируем в алфавитном порядке
     std::sort( container.begin(), container.end() );
 
@@ -115,10 +131,7 @@ void FileController::calculate()
 
         m_mutex.lock();
         if ( !m_fileRequests.isEmpty() )
-        {
-            const auto &dict = readFile( m_fileRequests.dequeue() );
-            emit getDict( getTop( dict ) );
-        }
+            readFile( m_fileRequests.dequeue() );
         m_mutex.unlock();
 
         QThread::sleep( 1 );
