@@ -68,7 +68,7 @@ void TopController::calculate()
 
         m_mutex.unlock();
 
-        QThread::usleep( 700 );
+        QThread::usleep( 500 );
     }
 
     emit finished();
