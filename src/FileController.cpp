@@ -1,32 +1,14 @@
 #include "FileController.h"
 
 #include <QCoreApplication>
-#include <QDateTime>
 #include <QDebug>
 #include <QFile>
 #include <QThread>
 #include <QUrl>
 
-namespace {
-struct
-{
-    bool operator()( std::pair< QString, quint64 > a,
-                     std::pair< QString, quint64 > b ) const
-    {
-        return a.second > b.second;
-    }
-} maxCountSort;
-
-constexpr auto TOP = 15;
-} // namespace
-
 FileController::FileController( QObject *parent ) : QObject( parent )
 {
-    qRegisterMetaType< DictionaryVector >( "DictionaryVector" );
-}
-
-FileController::~FileController()
-{
+    qRegisterMetaType< Dictionary >( "Dictionary" );
 }
 
 void FileController::abort()
@@ -39,6 +21,7 @@ void FileController::slotGetFilePath( const QUrl &filePath )
 {
     QMutexLocker locker( &m_mutex );
     m_fileRequests.enqueue( filePath );
+    qDebug() << "В очередь загрузки поступил новый файл" << filePath;
 }
 
 FileController::Dictionary FileController::readFile( const QUrl &filePath )
@@ -55,12 +38,15 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
         {
             qDebug() << "На обработку пришел пустой файл";
             emit getEmptyFile();
+            currentFile.close();
+            return container;
         }
 
         bool isSend = false;
         while ( !currentFile.atEnd() )
         {
             const auto &line = trUtf8( currentFile.readLine() );
+
             const auto progress =
                 ( ( size - currentFile.bytesAvailable() ) * 100 ) / size;
             emit getProgress( progress );
@@ -72,10 +58,13 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
                                    container[word]++;
                            } );
 
+            /// Для обновления гистограммы в условно реальном времени
+            /// Если посылать при каждой итерации цикла программа сходит с
+            /// ума и все перестает работать (для больших файлов)
             if ( ( progress % 5 == 0 ) && progress )
             {
                 if ( !isSend )
-                    emit getDict( getTop( container ) );
+                    emit getDict( container );
                 isSend = true;
             }
             else
@@ -93,30 +82,12 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
     return container;
 }
 
-FileController::DictionaryVector
-FileController::getTop( const FileController::Dictionary &dictionary )
-{
-    DictionaryVector container;
-    for ( auto &pair : dictionary )
-        container.push_back( pair );
-
-    /// Отсортируем элементы вектора по убыванию количества вхождений
-    std::sort( container.begin(), container.end(), maxCountSort );
-    /// Оставим в массиве топ 15 слов
-    if ( container.size() > TOP )
-        container.erase( container.begin() + TOP, container.end() );
-    /// Отсортируем в алфавитном порядке
-    std::sort( container.begin(), container.end() );
-
-    return container;
-}
-
 QString FileController::filterString( const QString &str )
 {
     return str.toLower()
         .remove( "\n" )
         .remove( QRegExp( "\\d" ) )
-        .remove( QRegExp( " [^a-zа-я\\d\\s] " ) );
+        .remove( QRegExp( "[^a-zа-я\\d\\s]" ) );
 }
 
 void FileController::calculate()
@@ -130,8 +101,10 @@ void FileController::calculate()
             break;
 
         m_mutex.lock();
+
         if ( !m_fileRequests.isEmpty() )
             readFile( m_fileRequests.dequeue() );
+
         m_mutex.unlock();
 
         QThread::sleep( 1 );
