@@ -11,18 +11,14 @@ struct
     {
         return a.second > b.second;
     }
-} maxCountSort;
+} maxCountSort; ///< Для сортировки вектора по количеству вхождений
 
-constexpr auto TOP = 15;
+constexpr auto TOP = 15; ///< Количество слов, которые должны входить в топ
 } // namespace
 
 TopController::TopController( QObject *parent ) : QObject( parent )
 {
     qRegisterMetaType< DictionaryVector >( "DictionaryVector" );
-}
-
-TopController::~TopController()
-{
 }
 
 void TopController::abort()
@@ -69,7 +65,7 @@ void TopController::calculate()
             getTop( m_dictionaryRequests.dequeue() );
         m_mutex.unlock();
 
-        QThread::sleep( 1 );
+        QThread::usleep( 700 );
     }
 
     emit finished();

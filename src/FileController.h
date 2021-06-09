@@ -16,7 +16,7 @@ class FileController : public QObject
 
 public:
     explicit FileController( QObject *parent = nullptr );
-    ~FileController();
+    ~FileController() {};
 
 public:
     ///
@@ -42,6 +42,9 @@ signals:
     ///
     void getDict( const Dictionary &dict );
 
+    ///
+    /// \brief getEmptyFile Сигнал о получении пустого файла
+    ///
     void getEmptyFile();
 
 public slots:

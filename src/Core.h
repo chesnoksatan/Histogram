@@ -24,4 +24,5 @@ private:
 private:
     void setConnections() const noexcept;
     void startThread() const noexcept;
+    void stopThread() const noexcept;
 };

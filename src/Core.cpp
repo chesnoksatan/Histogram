@@ -14,6 +14,7 @@ Core::Core( QObject *parent )
 
 Core::~Core()
 {
+    stopThread();
     delete m_topThread;
     delete m_fileThread;
     delete m_mainWindow;

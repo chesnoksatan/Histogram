@@ -12,10 +12,6 @@ FileController::FileController( QObject *parent ) : QObject( parent )
     qRegisterMetaType< Dictionary >( "Dictionary" );
 }
 
-FileController::~FileController()
-{
-}
-
 void FileController::abort()
 {
     QMutexLocker locker( &m_mutex );
@@ -51,6 +47,7 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
         while ( !currentFile.atEnd() )
         {
             const auto &line = trUtf8( currentFile.readLine() );
+
             const auto progress =
                 ( ( size - currentFile.bytesAvailable() ) * 100 ) / size;
             emit getProgress( progress );
@@ -62,6 +59,9 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
                                    container[word]++;
                            } );
 
+            /// Для обновления гистограммы в условно реальном времени
+            /// Если посылать при каждой итерации цикла программа сходит с ума и
+            /// все перестает работать (для больших файлов)
             if ( ( progress % 5 == 0 ) && progress )
             {
                 if ( !isSend )
@@ -102,8 +102,10 @@ void FileController::calculate()
             break;
 
         m_mutex.lock();
+
         if ( !m_fileRequests.isEmpty() )
             readFile( m_fileRequests.dequeue() );
+
         m_mutex.unlock();
 
         QThread::sleep( 1 );

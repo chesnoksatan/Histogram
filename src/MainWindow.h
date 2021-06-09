@@ -5,6 +5,8 @@
 #include <QQmlComponent>
 #include <QQmlContext>
 
+#include <memory>
+
 /**
  * @brief MainWindow класс для работы с qml частью приложения
  */
@@ -29,6 +31,7 @@ signals:
     /// \param filePath Путь к выбранному файлу
     ///
     void setFile( const QUrl &filePath );
+
     ///
     /// \brief getProgress сигнал об изменении прогресса чтения файла
     /// \param progress
@@ -41,9 +44,12 @@ signals:
     ///
     void getValue( const QJsonObject &value );
 
+    ///
+    /// \brief getEmptyFile Сигнал о получении пустого файла
+    ///
     void getEmptyFile();
 
 private:
-    QQmlApplicationEngine *m_engine;
+    std::shared_ptr< QQmlApplicationEngine > m_engine;
     QObject *m_mainWindow;
 };

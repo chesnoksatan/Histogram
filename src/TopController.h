@@ -18,7 +18,7 @@ class TopController : public QObject
 
 public:
     explicit TopController( QObject *parent = nullptr );
-    ~TopController();
+    ~TopController() {};
 
 public:
     ///
@@ -57,5 +57,5 @@ private:
     /// \brief getTop Трансформируем мапу в top15
     /// \param dictionary мапа со словами их количеством вхождений
     ///
-    DictionaryVector getTop( const Dictionary &dictionary );
+    void getTop( const Dictionary &dictionary );
 };
