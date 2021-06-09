@@ -7,22 +7,9 @@
 #include <QThread>
 #include <QUrl>
 
-namespace {
-struct
-{
-    bool operator()( std::pair< QString, quint64 > a,
-                     std::pair< QString, quint64 > b ) const
-    {
-        return a.second > b.second;
-    }
-} maxCountSort;
-
-constexpr auto TOP = 15;
-} // namespace
-
 FileController::FileController( QObject *parent ) : QObject( parent )
 {
-    qRegisterMetaType< DictionaryVector >( "DictionaryVector" );
+    qRegisterMetaType< Dictionary >( "Dictionary" );
 }
 
 FileController::~FileController()
@@ -39,6 +26,7 @@ void FileController::slotGetFilePath( const QUrl &filePath )
 {
     QMutexLocker locker( &m_mutex );
     m_fileRequests.enqueue( filePath );
+    qDebug() << "В очередь загрузки поступил новый файл" << filePath;
 }
 
 FileController::Dictionary FileController::readFile( const QUrl &filePath )
@@ -55,6 +43,8 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
         {
             qDebug() << "На обработку пришел пустой файл";
             emit getEmptyFile();
+            currentFile.close();
+            return container;
         }
 
         bool isSend = false;
@@ -75,7 +65,7 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
             if ( ( progress % 5 == 0 ) && progress )
             {
                 if ( !isSend )
-                    emit getDict( getTop( container ) );
+                    emit getDict( container );
                 isSend = true;
             }
             else
@@ -89,24 +79,6 @@ FileController::Dictionary FileController::readFile( const QUrl &filePath )
         qDebug() << QString( "Невозможно открыть файл %1. Причина: %2" )
                         .arg( filePath.toLocalFile(), currentFile.errorString() );
     }
-
-    return container;
-}
-
-FileController::DictionaryVector
-FileController::getTop( const FileController::Dictionary &dictionary )
-{
-    DictionaryVector container;
-    for ( auto &pair : dictionary )
-        container.push_back( pair );
-
-    /// Отсортируем элементы вектора по убыванию количества вхождений
-    std::sort( container.begin(), container.end(), maxCountSort );
-    /// Оставим в массиве топ 15 слов
-    if ( container.size() > TOP )
-        container.erase( container.begin() + TOP, container.end() );
-    /// Отсортируем в алфавитном порядке
-    std::sort( container.begin(), container.end() );
 
     return container;
 }
